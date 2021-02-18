@@ -1,0 +1,15 @@
+# Cache
+__pycache__/
+
+# Coding environment
+venv/
+.vscode/
+
+# Data
+letter_data/
+
+# Models
+models/
+
+# Misc
+.DS_Store
