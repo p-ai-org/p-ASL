@@ -3,10 +3,10 @@ import numpy as np
 import mediapipe as mp
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from letters import CLASS_TO_LETTER
+from utilities.letters import CLASS_TO_LETTER
 from joblib import dump, load
 import math
-from util import *
+from utilities.util import *
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 

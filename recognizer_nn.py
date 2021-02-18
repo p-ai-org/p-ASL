@@ -3,11 +3,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-import seaborn as sns
-from letters import CLASS_TO_LETTER
+from utilities.letters import CLASS_TO_LETTER
 from sklearn.metrics import confusion_matrix
-from confusion_matrix import make_confusion_matrix
-from util import *
+from utilities.confusion_matrix import make_confusion_matrix
+from utilities.util import *
 
 N_CLASSES = len(CLASS_TO_LETTER)
 
