@@ -1,5 +1,5 @@
 import numpy as np
-from letters import CLASS_TO_LETTER
+from .letters import CLASS_TO_LETTER
 
 FPS = 30
 NUM_DIM = 3
