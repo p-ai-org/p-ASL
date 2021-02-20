@@ -6,7 +6,7 @@ venv/
 .vscode/
 
 # Data
-letter_data/
+data/
 
 # Models
 models/

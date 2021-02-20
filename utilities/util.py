@@ -5,8 +5,9 @@ FPS = 30
 NUM_DIM = 3
 NUM_POINTS = 21
 
-LETTER_DATA_DIR = 'letter_data/'
-CORPUS_DIR = LETTER_DATA_DIR + 'corpus/'
+DATA_DIR = 'data/'
+LETTER_DATA_DIR = DATA_DIR + 'letter_data/'
+CORPUS_DIR = DATA_DIR + LETTER_DATA_DIR + 'corpus/'
 MODEL_DIR = 'models/'
 
 def unit_vector(vector):
