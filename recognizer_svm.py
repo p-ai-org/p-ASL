@@ -18,6 +18,7 @@ def plot_cm(classifier, X_test, y_test):
 
 def trainSVM(X_train, y_train):
   model = SVC(gamma='auto', probability=True)
+  print("Training model... (this can take a while)")
   model.fit(X_train, y_train)
   return model
 

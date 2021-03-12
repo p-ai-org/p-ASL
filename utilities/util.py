@@ -7,7 +7,7 @@ NUM_POINTS = 21
 
 DATA_DIR = 'data/'
 LETTER_DATA_DIR = DATA_DIR + 'letter_data/'
-CORPUS_DIR = DATA_DIR + LETTER_DATA_DIR + 'corpus/'
+CORPUS_DIR = LETTER_DATA_DIR + 'corpus/'
 MODEL_DIR = 'models/'
 
 def unit_vector(vector):
