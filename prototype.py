@@ -24,7 +24,7 @@ last_detected_mean = None
 last_pred = None
 last_letter = None
 reset = False
-show_hand = False
+show_hand = True
 time_threshold_in_frames = TIME_THRESHOLD_IN_SEC * FPS
 use_svm = False
 
@@ -103,8 +103,7 @@ while cap.isOpened():
         mp_drawing.draw_landmarks(
           image, hand_landmarks, mp_hands.HAND_CONNECTIONS,
           landmark_drawing_spec=mp_drawing.DrawingSpec(thickness=6, circle_radius=3),
-          connection_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255)),
-          color_fn=z_color_fn)
+          connection_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255)))
   cv2.imshow('Prototype', image)
   if cv2.waitKey(5) & 0xFF == 27:
     break
