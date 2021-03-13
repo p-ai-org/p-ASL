@@ -15,4 +15,4 @@ models/
 .DS_Store
 
 # Testing
-*_test.py
+*test_.py

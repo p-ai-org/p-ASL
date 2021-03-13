@@ -84,4 +84,5 @@ hands.close()
 cap.release()
 
 ''' Save database '''
-np.save('{}{}.npy'.format(SAVE_DIR, FNAME), dataset)
+create_directory_if_needed(SAVE_DIR)
+np.save(f'{SAVE_DIR}{FNAME}.npy', dataset)

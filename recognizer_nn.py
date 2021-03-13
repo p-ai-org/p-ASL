@@ -16,7 +16,7 @@ CORPUS_DIR = LETTER_CORPUS_DIR
 # CORPUS_DIR = CLASSIFIER_NORM_CORPUS_DIR
 
 # Whether to save this model or not
-SAVE = False
+SAVE = True
 SAVE_FNAME = 'recognizer_nn'
 
 def evaluate_cm(classifier, X_test, y_test):
@@ -68,4 +68,5 @@ evaluate_cm(model, X_test, y_test)
 
 # If saving, save model to model directory
 if SAVE:
-  model.save('{}{}'.format(MODEL_DIR, SAVE_FNAME))
+  create_directory_if_needed(MODEL_DIR)
+  model.save(f'{MODEL_DIR}{SAVE_FNAME}')

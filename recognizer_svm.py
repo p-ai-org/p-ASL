@@ -42,4 +42,5 @@ model = trainSVM(X_train, y_train)
 evaluate_cm(model, X_test, y_test)
 
 if SAVE:
-  dump(model, '{}{}'.format(MODEL_DIR, SAVE_FNAME))
+  create_directory_if_needed(MODEL_DIR)
+  dump(model, f'{MODEL_DIR}{SAVE_FNAME}')

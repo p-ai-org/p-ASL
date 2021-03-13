@@ -3,6 +3,7 @@ from .reference import *
 from sklearn.metrics import confusion_matrix
 from .confusion_matrix import make_confusion_matrix
 import matplotlib.pyplot as plt
+import os
 
 NUM_DIM = 3
 NUM_POINTS = 21
@@ -82,7 +83,7 @@ def create_Xy_data(save=False, names=LETTERS, data_dir=LETTER_DATA_DIR):
   X = np.zeros((1, NUM_POINTS * NUM_DIM))
   y = []
   for i, name in enumerate(names):
-    data = np.load('{}{}.npy'.format(data_dir, name))
+    data = np.load(f'{data_dir}{name}.npy')
     X = np.concatenate((X, flatten_np_hand(data)))
     y += [i] * len(data)
   y = np.array(y)
@@ -90,11 +91,12 @@ def create_Xy_data(save=False, names=LETTERS, data_dir=LETTER_DATA_DIR):
 
 def save_Xy_data(corpus_dir=LETTER_CORPUS_DIR, names=LETTERS, data_dir=LETTER_DATA_DIR):
   X, y = create_Xy_data(names=names, data_dir=data_dir)
-  np.save('{}X.npy'.format(corpus_dir), X)
-  np.save('{}y.npy'.format(corpus_dir), y)
+  create_directory_if_needed(corpus_dir)
+  np.save(f'{corpus_dir}X.npy', X)
+  np.save(f'{corpus_dir}y.npy', y)
 
 def retrieve_Xy_data(corpus_dir=LETTER_CORPUS_DIR):
-  return np.load('{}X.npy'.format(corpus_dir)), np.load('{}y.npy'.format(corpus_dir))
+  return np.load(f"{corpus_dir}X.npy"), np.load(f"{corpus_dir}y.npy")
 
 def plot_cm(y_pred, y_test, categories=LETTERS):
   cm = confusion_matrix(y_test, y_pred)
@@ -115,3 +117,12 @@ def normalize_hand_angle(hand):
   new_hand = hand.copy()
   angle = (0, 0, 0)
   return new_hand, angle
+
+def create_directory_if_needed(dirname, verbose=False):
+  if os.path.isdir(dirname):
+    if verbose:
+      print(f"[create_directory_if_needed] Directory '{dirname}' already exists. Aborting.")
+    return
+  os.makedirs(dirname)
+  if verbose:
+    print(f"[create_directory_if_needed] Directory '{dirname}' created.")
