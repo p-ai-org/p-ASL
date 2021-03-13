@@ -2,27 +2,31 @@ import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-from utilities.letters import CLASS_TO_LETTER
-from sklearn.metrics import confusion_matrix
-from utilities.confusion_matrix import make_confusion_matrix
+from utilities.reference import *
 from utilities.util import *
 
-N_CLASSES = len(CLASS_TO_LETTER)
+''' What type of handsign are we predicting? '''
+CATEGORIES = LETTERS
+# CATEGORIES = CLASSIFIERS
+N_CLASSES = len(CATEGORIES)
 
-def plot_cm(classifier, X_test, y_test):
-  class_names = list(CLASS_TO_LETTER.values())
+# Which corpus to use
+CORPUS_DIR = LETTER_CORPUS_DIR
+# CORPUS_DIR = CLASSIFIER_CORPUS_DIR
+# CORPUS_DIR = CLASSIFIER_NORM_CORPUS_DIR
+
+# Whether to save this model or not
+SAVE = False
+SAVE_FNAME = 'recognizer_nn'
+
+def evaluate_cm(classifier, X_test, y_test):
+  ''' Makes predictions using classifier and displays confusion matrix of actual v. predicted '''
   y_pred = np.argmax(classifier.predict(X_test), axis=1)
   y_test = np.argmax(y_test, axis=1)
-  cm = confusion_matrix(y_test, y_pred)
-  make_confusion_matrix(cm, categories=class_names, percent=False)
-  plt.show()
-
-def get_one_hot(targets, nb_classes):
-    res = np.eye(nb_classes)[np.array(targets).reshape(-1)]
-    return res.reshape(list(targets.shape)+[nb_classes])
+  plot_cm(y_pred, y_test, categories=CATEGORIES)
 
 def buildModel(dropout_rate=0.3):
+  ''' Build neural network '''
   model = Sequential()
   model.add(Dense(NUM_DIM * NUM_POINTS))
   model.add(Dense(256))
@@ -42,18 +46,26 @@ def trainModel(model, X_train, y_train, batch_size=32, epochs=25):
 def evaluate(model, X_test, y_test, batch_size=32):
   return model.evaluate(X_test, y_test, batch_size=batch_size)
 
-X, y = retrieve_Xy_data()
+# Load X and y data
+X, y = retrieve_Xy_data(corpus_dir=CORPUS_DIR)
 
+# Convert each y value to a one-hot vector. E.g. 2 (C) --> [0 0 1 0 0 ... 0 0 0]
 y = get_one_hot(np.array(y), N_CLASSES)
 
+# Check shapes
 print(X.shape)
 print(y.shape)
 
+# Split data into train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 model = buildModel()
 compileModel(model)
 trainModel(model, X_train, y_train, epochs=5)
-print(evaluate(model, X_test, y_test))
-plot_cm(model, X_test, y_test)
 
-model.save('{}recognizer_nn'.format(MODEL_DIR))
+# Evaluate and visualize
+print(evaluate(model, X_test, y_test))
+evaluate_cm(model, X_test, y_test)
+
+# If saving, save model to model directory
+if SAVE:
+  model.save('{}{}'.format(MODEL_DIR, SAVE_FNAME))

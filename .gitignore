@@ -13,3 +13,6 @@ models/
 
 # Misc
 .DS_Store
+
+# Testing
+*_test.py

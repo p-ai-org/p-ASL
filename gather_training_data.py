@@ -3,60 +3,77 @@ import numpy as np
 import mediapipe as mp
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from utilities.letters import CLASS_TO_LETTER
 from joblib import dump, load
 import math
 from utilities.util import *
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
-# Constants
-DATASET_SIZE = 2000
-SHUTTER_TIME = 1 * FPS
-
 cap = cv2.VideoCapture(0)
+
+# Constants
+DATASET_SIZE = 1000
+SHUTTER_TIME = 1 * cap.get(cv2.CAP_PROP_FPS)
+SHUTTER = False
+# What to name this numpy file
+FNAME = 'ONE'
+
+''' Where to save this data '''
+# SAVE_DIR = LETTER_DATA_DIR
+SAVE_DIR = CLASSIFIER_DATA_DIR
+# SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
+
+# What will end up being the dataset collected during this session
 dataset = np.empty((1, NUM_POINTS, NUM_DIM))
 done = False
-fname = 'Q'
+# Load MediaPipe model
 hands = mp_hands.Hands(
   min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=1)
-shutter = False
 ticker = 0
 
 while cap.isOpened():
+  ''' Reading frame '''
   success, image = cap.read()
   if not success:
     print("Ignoring empty camera frame.")
     # If loading a video, use 'break' instead of 'continue'.
     continue
-
-  if shutter and ticker < SHUTTER_TIME:
+  if SHUTTER and ticker < SHUTTER_TIME:
     ticker += 1
     continue
 
+  ''' CV2 fun '''
   # Flip the image horizontally for a later selfie-view display, and convert
   # the BGR image to RGB.
   image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
   # To improve performance, optionally mark the image as not writeable to
   # pass by reference.
   image.flags.writeable = False
+
+  ''' MediaPipe identifies hand(s) '''
   results = hands.process(image)
   # Draw the hand annotations on the image.
   image.flags.writeable = True
   image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+  
+  # If we found hands
   if results.multi_hand_landmarks:
+    # For each hand
     for hand_landmarks in results.multi_hand_landmarks:
+      # Concatenate all the hand landmarks to the dataset
       dataset = np.concatenate((dataset, landmarks_to_np(hand_landmarks.landmark)))
+      # Print the current size of the dataset
       print(dataset.shape[0] - 1)
+      # If reached desired size, finish up
       if dataset.shape[0] - 1 == DATASET_SIZE:
         dataset = dataset[1:]
         done = True
         break
+      # Draw hand landmarks
       mp_drawing.draw_landmarks(
         image, hand_landmarks, mp_hands.HAND_CONNECTIONS,
         landmark_drawing_spec=mp_drawing.DrawingSpec(thickness=6, circle_radius=3),
-        connection_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255)),
-        color_fn=z_color_fn)
+        connection_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255)))
     if done:
       break
   cv2.imshow('Trainer', image)
@@ -65,4 +82,6 @@ while cap.isOpened():
   ticker = 0
 hands.close()
 cap.release()
-np.save('{}{}.npy'.format(LETTER_DATA_DIR, fname), dataset)
+
+''' Save database '''
+np.save('{}{}.npy'.format(SAVE_DIR, FNAME), dataset)

@@ -3,7 +3,7 @@ import numpy as np
 import mediapipe as mp
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from utilities.letters import CLASS_TO_LETTER
+from utilities.reference import *
 from joblib import dump, load
 import math
 from utilities.util import *
@@ -25,7 +25,7 @@ last_pred = None
 last_letter = None
 reset = False
 show_hand = True
-time_threshold_in_frames = TIME_THRESHOLD_IN_SEC * FPS
+time_threshold_in_frames = TIME_THRESHOLD_IN_SEC * cap.get(cv2.CAP_PROP_FPS)
 use_svm = False
 
 if use_svm:
@@ -77,7 +77,7 @@ while cap.isOpened():
       else:
         probs = recognizer.predict(hand_np_flat)[0]
       pred_index = np.argmax(probs)
-      letter_pred = CLASS_TO_LETTER[int(round(pred_index))]
+      letter_pred = index_to_letter(int(round(pred_index)))
       # Build confidence in this prediction (not unstable)
       if letter_pred == last_pred:
         consistency_counter += 1

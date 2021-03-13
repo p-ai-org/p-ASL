@@ -1,13 +1,22 @@
 import numpy as np
-from .letters import CLASS_TO_LETTER
+from .reference import *
+from sklearn.metrics import confusion_matrix
+from .confusion_matrix import make_confusion_matrix
+import matplotlib.pyplot as plt
 
-FPS = 30
 NUM_DIM = 3
 NUM_POINTS = 21
 
 DATA_DIR = 'data/'
+
 LETTER_DATA_DIR = DATA_DIR + 'letter_data/'
-CORPUS_DIR = LETTER_DATA_DIR + 'corpus/'
+LETTER_CORPUS_DIR = LETTER_DATA_DIR + 'corpus/'
+
+CLASSIFIER_DATA_DIR = DATA_DIR + 'classifier_data/'
+CLASSIFIER_CORPUS_DIR = CLASSIFIER_DATA_DIR + 'corpus/'
+
+CLASSIFIER_NORM_DATA_DIR = DATA_DIR + 'classifier_norm_data/'
+CLASSIFIER_NORM_CORPUS_DIR = CLASSIFIER_NORM_DATA_DIR + 'corpus/'
 MODEL_DIR = 'models/'
 
 def unit_vector(vector):
@@ -15,14 +24,7 @@ def unit_vector(vector):
   return vector / np.linalg.norm(vector)
 
 def angle_between(v1, v2):
-  """ Returns the angle in radians between vectors 'v1' and 'v2'::
-  >>> angle_between((1, 0, 0), (0, 1, 0))
-  1.5707963267948966
-  >>> angle_between((1, 0, 0), (1, 0, 0))
-  0.0
-  >>> angle_between((1, 0, 0), (-1, 0, 0))
-  3.141592653589793
-  """
+  """ Returns the angle in radians between vectors 'v1' and 'v2' """
   v1_u = unit_vector(v1)
   v2_u = unit_vector(v2)
   return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
@@ -76,20 +78,40 @@ def euclidian_distance(v1, v2, exaggerate_z=False):
   else:
     return np.linalg.norm(v2 - v1)
 
-def create_Xy_data(save=False):
+def create_Xy_data(save=False, names=LETTERS, data_dir=LETTER_DATA_DIR):
   X = np.zeros((1, NUM_POINTS * NUM_DIM))
   y = []
-  for i, letter in enumerate(list(CLASS_TO_LETTER.values())):
-    data = np.load('{}{}.npy'.format(LETTER_DATA_DIR, letter))
+  for i, name in enumerate(names):
+    data = np.load('{}{}.npy'.format(data_dir, name))
     X = np.concatenate((X, flatten_np_hand(data)))
     y += [i] * len(data)
   y = np.array(y)
   return X[1:], y
 
-def save_Xy_data():
-  X, y = create_Xy_data()
-  np.save('{}X.npy'.format(CORPUS_DIR), X)
-  np.save('{}y.npy'.format(CORPUS_DIR), y)
+def save_Xy_data(corpus_dir=LETTER_CORPUS_DIR, names=LETTERS, data_dir=LETTER_DATA_DIR):
+  X, y = create_Xy_data(names=names, data_dir=data_dir)
+  np.save('{}X.npy'.format(corpus_dir), X)
+  np.save('{}y.npy'.format(corpus_dir), y)
 
-def retrieve_Xy_data():
-  return np.load('{}X.npy'.format(CORPUS_DIR)), np.load('{}y.npy'.format(CORPUS_DIR))
+def retrieve_Xy_data(corpus_dir=LETTER_CORPUS_DIR):
+  return np.load('{}X.npy'.format(corpus_dir)), np.load('{}y.npy'.format(corpus_dir))
+
+def plot_cm(y_pred, y_test, categories=LETTERS):
+  cm = confusion_matrix(y_test, y_pred)
+  make_confusion_matrix(cm, categories=categories, percent=False)
+  plt.show()
+
+def get_one_hot(targets, n_classes):
+    res = np.eye(n_classes)[np.array(targets).reshape(-1)]
+    return res.reshape(list(targets.shape)+[n_classes])
+
+def normalize_hand_angle(hand):
+  ''' Normalizes the hand angle such that the vector between points 0 and 1 are aligned with the vertical 
+        Parameters:
+          hand: a (21, 3) matrix containing the landmarks of a hand
+        Returns a tuple (new_hand, angle)
+          new_hand: a (21, 3) angle-normalized version of the original hand
+          angle: a 3-tuple with the amount of original rotation in the x-, y-, and z- dimensions'''
+  new_hand = hand.copy()
+  angle = (0, 0, 0)
+  return new_hand, angle
