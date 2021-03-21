@@ -6,18 +6,18 @@ from utilities.reference import *
 from utilities.util import *
 
 ''' What type of handsign are we predicting? '''
-CATEGORIES = LETTERS
-# CATEGORIES = CLASSIFIERS
+# CATEGORIES = LETTERS
+CATEGORIES = CLASSIFIERS
 N_CLASSES = len(CATEGORIES)
 
 # Which corpus to use
-CORPUS_DIR = LETTER_CORPUS_DIR
+# CORPUS_DIR = LETTER_CORPUS_DIR
 # CORPUS_DIR = CLASSIFIER_CORPUS_DIR
-# CORPUS_DIR = CLASSIFIER_NORM_CORPUS_DIR
+CORPUS_DIR = CLASSIFIER_NORM_CORPUS_DIR
 
 # Whether to save this model or not
 SAVE = True
-SAVE_FNAME = 'recognizer_nn'
+SAVE_FNAME = 'classifier_norm'
 
 def evaluate_cm(classifier, X_test, y_test):
   ''' Makes predictions using classifier and displays confusion matrix of actual v. predicted '''
@@ -58,9 +58,15 @@ print(y.shape)
 
 # Split data into train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+
+# X_train = X
+# y_train = y
+# X_test, y_test = retrieve_Xy_data(corpus_dir='data/classifier_data_normalized/corpus/')
+# y_test = get_one_hot(np.array(y_test), N_CLASSES)
+
 model = buildModel()
 compileModel(model)
-trainModel(model, X_train, y_train, epochs=5)
+trainModel(model, X_train, y_train, epochs=8)
 
 # Evaluate and visualize
 print(evaluate(model, X_test, y_test))

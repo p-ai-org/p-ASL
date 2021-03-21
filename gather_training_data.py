@@ -18,6 +18,8 @@ SHUTTER = False
 # What to name this numpy file
 FNAME = 'ONE'
 
+NORMALIZE_ANGLE = False
+
 ''' Where to save this data '''
 # SAVE_DIR = LETTER_DATA_DIR
 SAVE_DIR = CLASSIFIER_DATA_DIR
@@ -60,8 +62,12 @@ while cap.isOpened():
   if results.multi_hand_landmarks:
     # For each hand
     for hand_landmarks in results.multi_hand_landmarks:
+      # Get landmarks in np format
+      hand_np_raw = landmarks_to_np(hand_landmarks.landmark)
+      # Normalize size (and angle, if desired)
+      hand_np, _ = normalize(hand_np_raw, size=True, angle=NORMALIZE_ANGLE)
       # Concatenate all the hand landmarks to the dataset
-      dataset = np.concatenate((dataset, landmarks_to_np(hand_landmarks.landmark)))
+      dataset = np.concatenate((dataset, hand_np))
       # Print the current size of the dataset
       print(dataset.shape[0] - 1)
       # If reached desired size, finish up

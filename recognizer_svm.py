@@ -5,18 +5,18 @@ from utilities.reference import *
 from utilities.util import *
 
 ''' What type of handsign are we predicting? '''
-CATEGORIES = LETTERS
-# CATEGORIES = CLASSIFIERS
+# CATEGORIES = LETTERS
+CATEGORIES = CLASSIFIERS
 N_CLASSES = len(CATEGORIES)
 
 ''' Which corpus are we using? '''
-CORPUS_DIR = LETTER_CORPUS_DIR
-# CORPUS_DIR = CLASSIFIER_CORPUS_DIR
+# CORPUS_DIR = LETTER_CORPUS_DIR
+CORPUS_DIR = CLASSIFIER_CORPUS_DIR
 # CORPUS_DIR = CLASSIFIER_NORM_CORPUS_DIR
 
 # Whether to save this model or not
-SAVE = False
-SAVE_FNAME = 'recognizer_svm'
+SAVE = True
+SAVE_FNAME = 'svm_non_norm'
 
 def evaluate_cm(classifier, X_test, y_test):
   y_pred = classifier.predict(X_test)
