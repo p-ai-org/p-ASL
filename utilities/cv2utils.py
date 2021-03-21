@@ -16,6 +16,7 @@ def process_and_identify_hands(image, hands):
   return image, results
 
 def add_text(image, text="", right=0, top=0, size=1, color=(255,0,0), thickness=1):
+  ''' Adds text to an image using cv2 '''
   return cv2.putText(
     image, 
     str(text),

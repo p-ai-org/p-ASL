@@ -6,7 +6,7 @@ from tensorflow.keras.models import Sequential
 from utilities.reference import *
 from joblib import dump, load
 import math
-import cv2utils
+import utilities.cv2utils as cv2utils
 from utilities.util import *
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands

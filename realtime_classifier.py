@@ -7,7 +7,7 @@ from utilities.reference import *
 from joblib import dump, load
 import math
 from utilities.util import *
-import cv2utils
+import utilities.cv2utils as cv2utils
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
