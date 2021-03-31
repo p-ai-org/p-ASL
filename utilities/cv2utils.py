@@ -1,6 +1,6 @@
 import cv2
 
-def process_and_identify_hands(image, hands):
+def process_and_identify_landmarks(image, landmark_detector):
   ''' Processes an image and identifies the hands in it.  
       Takes in an image from the videcapture and the mediapipe hands classifier'''
   # Flip the image horizontally for a later selfie-view display, and convert
@@ -9,7 +9,7 @@ def process_and_identify_hands(image, hands):
   # To improve performance, optionally mark the image as not writeable to
   # pass by reference.
   image.flags.writeable = False
-  results = hands.process(image)
+  results = landmark_detector.process(image)
   # Draw the hand annotations on the image.
   image.flags.writeable = True
   image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)

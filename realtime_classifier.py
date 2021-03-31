@@ -60,7 +60,7 @@ while cap.isOpened():
     continue
 
   # Process and get hands
-  image, results = cv2utils.process_and_identify_hands(image, hands)
+  image, results = cv2utils.process_and_identify_landmarks(image, hands)
 
   if results.multi_hand_landmarks:
     # For each hand (not relevant yet)

@@ -1,11 +1,10 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
 from joblib import dump, load
 import math
 from utilities.util import *
+import utilities.cv2utils as cv2utils
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
@@ -38,25 +37,13 @@ while cap.isOpened():
   success, image = cap.read()
   if not success:
     print("Ignoring empty camera frame.")
-    # If loading a video, use 'break' instead of 'continue'.
     continue
   if SHUTTER and ticker < SHUTTER_TIME:
     ticker += 1
     continue
 
-  ''' CV2 fun '''
-  # Flip the image horizontally for a later selfie-view display, and convert
-  # the BGR image to RGB.
-  image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-  # To improve performance, optionally mark the image as not writeable to
-  # pass by reference.
-  image.flags.writeable = False
-
-  ''' MediaPipe identifies hand(s) '''
-  results = hands.process(image)
-  # Draw the hand annotations on the image.
-  image.flags.writeable = True
-  image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+  # Process and get hands
+  image, results = cv2utils.process_and_identify_landmarks(image, hands)
   
   # If we found hands
   if results.multi_hand_landmarks:
@@ -67,7 +54,7 @@ while cap.isOpened():
       # Normalize size (and angle, if desired)
       hand_np, _ = normalize(hand_np_raw, size=True, angle=NORMALIZE_ANGLE)
       # Concatenate all the hand landmarks to the dataset
-      dataset = np.concatenate((dataset, hand_np))
+      dataset = np.concatenate((dataset, [hand_np]))
       # Print the current size of the dataset
       print(dataset.shape[0] - 1)
       # If reached desired size, finish up

@@ -58,7 +58,7 @@ while cap.isOpened():
     continue
 
   # Process and get hands
-  image, results = cv2utils.process_and_identify_hands(image, hands)
+  image, results = cv2utils.process_and_identify_landmarks(image, hands)
 
   # Show building string
   image = cv2utils.add_text(image, text=build_str, right=100, top=200, size=2, color=(0, 0, 255), thickness=3)

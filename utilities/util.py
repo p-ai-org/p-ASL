@@ -4,6 +4,7 @@ from sklearn.metrics import confusion_matrix
 from .confusion_matrix import make_confusion_matrix
 import matplotlib.pyplot as plt
 import os
+from tqdm import tqdm
 
 NUM_DIM = 3
 NUM_POINTS = 21
@@ -18,6 +19,10 @@ CLASSIFIER_CORPUS_DIR = CLASSIFIER_DATA_DIR + 'corpus/'
 
 CLASSIFIER_NORM_DATA_DIR = DATA_DIR + 'classifier_norm_data/'
 CLASSIFIER_NORM_CORPUS_DIR = CLASSIFIER_NORM_DATA_DIR + 'corpus/'
+
+MOTION_DATA_DIR = DATA_DIR + 'motion_data/'
+MOTION_CORPUS_DIR = MOTION_DATA_DIR + 'corpus/'
+
 MODEL_DIR = 'models/'
 
 # Define canonical directions in the order that MediaPipe presents it
@@ -102,6 +107,16 @@ def landmarks_to_np(landmark):
     arr[i,0] = point.x
     arr[i,1] = point.y
     arr[i,2] = point.z
+  return arr
+
+def pose_landmarks_to_np(landmark, top_half=True):
+  arr = np.empty((len(landmark), NUM_DIM))
+  for i, point in enumerate(landmark):
+    arr[i,0] = point.x
+    arr[i,1] = point.y
+    arr[i,2] = point.z
+  if top_half:
+    arr = arr[:25]
   return arr
 
 def flatten_hand(arr):
@@ -247,7 +262,7 @@ def create_directory_if_needed(dirname, verbose=False):
   if verbose:
     print(f"[create_directory_if_needed] Directory '{dirname}' created.")
 
-def angle_normalize_directory(directory, new_directory='NORMALIZED_DEFAULT_DIR/'):
+def normalize_directory(directory, new_directory='NORMALIZED_DEFAULT_DIR/', size=True, angle=False):
   ''' Angle-normalizes and saves all np files in directory to new_directory '''
   if directory == new_directory:
     print("[angle_normalize_directory]: WARNING: You are replacing existing files")
@@ -261,8 +276,8 @@ def angle_normalize_directory(directory, new_directory='NORMALIZED_DEFAULT_DIR/'
     # Iterate through each hand in file
     for i, hand in enumerate(hands):
       # Angle normalize and replace existing hand
-      angle_normal_hand, _ = normalize_hand_angle(hand)
-      hands[i] = angle_normal_hand
+      normalized_hand, _ = normalize(hand, size=size, angle=angle)
+      hands[i] = normalized_hand
     # Replace filename with new sign file
     np.save(f"{new_directory}{file}", hands)
 
@@ -275,3 +290,37 @@ def plot_hand(hand):
   ax.set_ylabel('Y (UP)')
   ax.set_zlabel('Z (OUT)')
   plt.show()
+
+def check_normalized(directory, size=True, angle=False, verbose=False):
+  ''' Checks if a directory is normalized, with options for size and angle  
+      Returns true if every hand is normalized, false otherwise '''
+  items = os.listdir(directory)
+  # Get all np files
+  np_files = [i for i in items if i[-4:] == '.npy']
+  # Traverse through np files and load
+  for file in tqdm(np_files):
+    hands = np.load(f"{directory}{file}")
+    for i, hand in enumerate(hands):
+      if size:
+        maximum = 0
+        for vec in hand:
+          maximum = max(maximum, np.linalg.norm(vec))
+        if not np.allclose(maximum, 1.0):
+          if verbose:
+            print(f'[WARNING]: Maximum vector length not 1 at index {i} of file {file}')
+            plot_hand(hand)
+          return False
+      if angle:
+        palm_vector = get_normal_from_three_pts(hand[1], hand[17], hand[5])
+        up_vector = hand[5] - hand[1]
+        if not np.allclose(palm_vector, OUT):
+          if verbose:
+            print(f'[WARNING]: Hand not facing outwards at index {i} of file {file}')
+            plot_hand(hand)
+          return False
+        if not np.allclose(unit_vector(up_vector), UP):
+          if verbose:
+            print(f'[WARNING]: Hand not aligned with the vertical at index {i} of file {file}')
+            plot_hand(hand)
+          return False
+  return True
