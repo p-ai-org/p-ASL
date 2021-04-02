@@ -24,12 +24,12 @@ SAVE_DIR = MOTION_DATA_DIR
 # Load MediaPipe model
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=False)
 # What will end up being the dataset collected during this session
-dataset = np.empty((1, FRAMES_PER_SAMPLE, NUM_DIM))
+dataset = np.empty((1, FRAMES_PER_SAMPLE, NUM_DIM * 2))
 count = 0
 reset_count = 0
 reset_period = False
 
-this_sample = np.empty((FRAMES_PER_SAMPLE, NUM_DIM))
+this_sample = np.empty((FRAMES_PER_SAMPLE + 1, NUM_DIM * 2))
 
 while cap.isOpened():
   ''' Reading frame '''
@@ -62,32 +62,48 @@ while cap.isOpened():
   if results.pose_landmarks:
     # Get landmarks in np format
     pose_np = pose_landmarks_to_np(results.pose_landmarks.landmark)
-    wrist_diff = pose_np[15] - pose_np[16]
+    
+    left_hand, right_hand = pose_np[19], pose_np[20]
+    
     torso_width = (pose_np[11] - pose_np[12])[0]
     torso_height = (pose_np[23] - pose_np[11])[1]
-    # Normalize distance between hands by torso size (to account for distance to camera)
-    wrist_diff_norm = np.array([wrist_diff[0] / torso_width, wrist_diff[1] / torso_height, wrist_diff[2] / torso_width])
+
+    # We'll set the origin to be in the middle of the right and left shoulder
+    # This is better than having (0, 0) be at the top left of the screen
+    origin = np.array([torso_width / 2 + pose_np[12][0], pose_np[12][1], 0])
+    left_hand -= origin
+    right_hand -= origin
+
+    # Scale according to torso size (to account for distance to camera)
+    left_hand = [left_hand[0] / torso_width, left_hand[1] / torso_height, left_hand[2] / torso_width]
+    right_hand = [right_hand[0] / torso_width, right_hand[1] / torso_height, right_hand[2] / torso_width]
 
     ''' Printing stuff '''
-    diff_text = f"Wrist diff: {[round(x, 3) for x in wrist_diff]}"
-    torso_text = f"Torso width: {round(torso_width, 3)}, height: {round(torso_height, 3)}"
-    diff_norm_text = f"Wrist diff (norm): {[round(x, 3) for x in wrist_diff_norm]}"
-    image = cv2utils.add_text(image, text=diff_text, right=50, top=50, size=0.75, color=(0,255,0), thickness=2)
-    image = cv2utils.add_text(image, text=diff_norm_text, right=500, top=50, size=0.75, color=(0,255,0), thickness=2)
-    image = cv2utils.add_text(image, text=torso_text, right=50, top=100, size=0.75, color=(0,0,255), thickness=2)
+    origin_text = f"Origin: {[round(x, 3) for x in origin]}"
+    image = cv2utils.add_text(image, text=origin_text, right=50, top=50, size=0.75, color=(0,255,0), thickness=2)
+    hand_text = f"Left: {[round(x, 3) for x in left_hand]}, Right: {[round(x, 3) for x in right_hand]}"
+    image = cv2utils.add_text(image, text=hand_text, right=50, top=100, size=0.75, color=(0,0,255), thickness=2)
+
+    # Add dataset count
+    image = cv2utils.add_text(image, text=str(dataset.shape[0]-1), right=50, top=500, size=3, color=(255,255,0), thickness=3)
+
+    hands_data = np.concatenate((left_hand, right_hand))
 
     # Add this timestep to the current sample
-    this_sample[count] = wrist_diff_norm
+    this_sample[count] = hands_data
     count += 1
     # If we've finished this sample
-    if count == FRAMES_PER_SAMPLE - 1:
+    if count == FRAMES_PER_SAMPLE + 1:
       count = 0
-      dataset = np.concatenate((dataset, [this_sample]))
+      print(dataset.shape)
+      print(this_sample.shape)
+      dataset = np.concatenate((dataset, [this_sample[:-1]]))
       print(f'>> RECORDING CAPTURED ({dataset.shape[0] - 1})')
       reset_period = True
 
     # If reached desired size, finish up
     if dataset.shape[0] - 1 == DATASET_SIZE:
+      # First one was all zeros
       dataset = dataset[1:]
       break
   cv2.imshow('Trainer', image)

@@ -35,6 +35,18 @@ CLASSIFIERS = [
   'Y'
 ]
 
+MOTIONS = [
+  'MOVE_APART',
+  'MOVE_TOWARD',
+  'PAST',
+  'ABOVE',
+  'BELOW',
+  'BESIDE',
+  'FAR_APART',
+  'FLY_OVER',
+  'FLY_UNDER'
+]
+
 def letter_to_index(letter):
   return LETTERS.index(letter)
 
@@ -46,3 +58,9 @@ def classifier_to_index(classifier):
 
 def index_to_classifier(index):
   return CLASSIFIERS[index]
+
+def motion_to_index(motion):
+  return MOTIONS.index(motion)
+
+def index_to_motion(index):
+  return MOTIONS[index]

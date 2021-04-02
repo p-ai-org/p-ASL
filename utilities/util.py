@@ -141,7 +141,18 @@ def create_Xy_data(names=LETTERS, data_dir=LETTER_DATA_DIR):
   y = []
   for i, name in enumerate(names):
     data = np.load(f'{data_dir}{name}.npy')
-    X = np.concatenate((X, flatten_hand(data)))
+    X = np.concatenate((X, np.reshape(data, (data.shape[0], NUM_POINTS * NUM_DIM))))
+    y += [i] * len(data)
+  y = np.array(y)
+  return X[1:], y
+
+def create_Xy_data_motion(timesteps=30):
+  ''' Compile all individual motion numpy files into X and y data '''
+  X = np.zeros((1, timesteps, NUM_DIM * 2))
+  y = []
+  for i, name in enumerate(MOTIONS):
+    data = np.load(f'{MOTION_DATA_DIR}{name}.npy')
+    X = np.concatenate((X, data))
     y += [i] * len(data)
   y = np.array(y)
   return X[1:], y
@@ -152,6 +163,13 @@ def save_Xy_data(corpus_dir=LETTER_CORPUS_DIR, names=LETTERS, data_dir=LETTER_DA
   create_directory_if_needed(corpus_dir)
   np.save(f'{corpus_dir}X.npy', X)
   np.save(f'{corpus_dir}y.npy', y)
+
+def save_Xy_data_motion(timesteps=30):
+  ''' Compiles all the numpy files for motion into a corpus dir '''
+  X, y = create_Xy_data_motion(timesteps=timesteps)
+  create_directory_if_needed(MOTION_CORPUS_DIR)
+  np.save(f'{MOTION_CORPUS_DIR}X.npy', X)
+  np.save(f'{MOTION_CORPUS_DIR}y.npy', y)
 
 def retrieve_Xy_data(corpus_dir=LETTER_CORPUS_DIR):
   ''' Fetch the X and y data from a corpus directory '''
@@ -324,3 +342,14 @@ def check_normalized(directory, size=True, angle=False, verbose=False):
             plot_hand(hand)
           return False
   return True
+
+def remove_large_values(data, threshold=5):
+  to_remove = []
+  for i, sample in enumerate(data):
+    print(np.max(sample))
+    print(np.min(sample))
+    if np.max(sample) > threshold or np.min(sample) < -threshold:
+      to_remove.append(i)
+  print(to_remove)
+  data = [sample for i in range(len(data)) if i not in to_remove]
+  return np.array(data)
