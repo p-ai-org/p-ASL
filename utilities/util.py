@@ -261,16 +261,6 @@ def normalize(hand, size=True, angle=False):
   return hand, angles
 
 def normalize_hand_angle(hand):
-<<<<<<< HEAD
-  ''' Rotates a hand such that the vector between points 1 and 5 are aligned with the vertical  
-      Returns (new hand, the angles in tuple format)'''
-  angles = get_hand_angle(hand)
-  around_up_angle, around_right_angle, around_out_angle = angles
-  new_hand = np.zeros(hand.shape)
-  for i, landmark in enumerate(hand):
-    new_hand[i] = rotate_vector(landmark, around_up_angle, around_right_angle, around_out_angle)
-  return new_hand, angles
-=======
   ''' Normalizes the hand angle such that the vector between points 0 and 1 are aligned with the vertical 
         Parameters:
           hand: a (21, 3) matrix containing the landmarks of a hand
@@ -287,7 +277,6 @@ def normalize_hand_angle(hand):
   angle = tuple(map(lambda x: angle_between(np.multiply(knuckle_point,np.subtract(mask,x)),x)), axes)
   new_hand = normalize_np_hand(hand)
   return new_hand, angle
->>>>>>> fb06487 (collected classifier and classifier-norm data)
 
 def create_directory_if_needed(dirname, verbose=False):
   ''' Creates a directory if it does not exist. If it does exist, nothing happens '''
