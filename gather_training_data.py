@@ -17,13 +17,7 @@ SHUTTER = False
 # What to name this numpy file
 FNAME = 'Y'
 
-<<<<<<< HEAD
-NORMALIZE_ANGLE = False
-
-''' Where to save this data '''
-=======
 ''' Where to save this data ''' 
->>>>>>> fb06487 (collected classifier and classifier-norm data)
 # SAVE_DIR = LETTER_DATA_DIR
 # SAVE_DIR = CLASSIFIER_DATA_DIR
 SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
