@@ -1,4 +1,4 @@
-import cv2
+from cv2 import cv2
 import numpy as np
 import mediapipe as mp
 from joblib import dump, load
@@ -15,14 +15,18 @@ DATASET_SIZE = 1000
 SHUTTER_TIME = 1 * cap.get(cv2.CAP_PROP_FPS)
 SHUTTER = False
 # What to name this numpy file
-FNAME = 'ONE'
+FNAME = 'Y'
 
+<<<<<<< HEAD
 NORMALIZE_ANGLE = False
 
 ''' Where to save this data '''
+=======
+''' Where to save this data ''' 
+>>>>>>> fb06487 (collected classifier and classifier-norm data)
 # SAVE_DIR = LETTER_DATA_DIR
-SAVE_DIR = CLASSIFIER_DATA_DIR
-# SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
+# SAVE_DIR = CLASSIFIER_DATA_DIR
+SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
 
 # What will end up being the dataset collected during this session
 dataset = np.empty((1, NUM_POINTS, NUM_DIM))
