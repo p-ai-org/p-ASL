@@ -17,11 +17,11 @@ CONFIDENCE_THRESHOLD = 0
 TIME_THRESHOLD_IN_SEC = 0
 
 # Which model to use
-MODEL_NAME = 'nn_non_norm'
+MODEL_NAME = 'recognizer_nn'
 # Set to true if model is a SVM
 USE_SVM = False
 # Whether to normalize the hand to be facing outward (in theory)
-NORMALIZE_ANGLE = True
+NORMALIZE_ANGLE = False
 
 # Show the landmarks in the video
 SHOW_HAND = True
@@ -49,7 +49,7 @@ def classify(hand_np):
   else:
     probs = recognizer.predict(hand_np_flat)[0]
   pred_index = np.argmax(probs)
-  classifier_pred = index_to_classifier(int(round(pred_index)))
+  classifier_pred = index_to_letter(int(round(pred_index)))
   return probs, pred_index, classifier_pred
 
 while cap.isOpened():

@@ -22,6 +22,7 @@ FNAME = 'Y'
 # SAVE_DIR = CLASSIFIER_DATA_DIR
 SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
 
+NORMALIZE_ANGLE = False
 # What will end up being the dataset collected during this session
 dataset = np.empty((1, NUM_POINTS, NUM_DIM))
 done = False

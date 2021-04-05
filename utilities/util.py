@@ -261,22 +261,14 @@ def normalize(hand, size=True, angle=False):
   return hand, angles
 
 def normalize_hand_angle(hand):
-  ''' Normalizes the hand angle such that the vector between points 0 and 1 are aligned with the vertical 
-        Parameters:
-          hand: a (21, 3) matrix containing the landmarks of a hand
-        Returns a tuple (new_hand, angle)
-          new_hand: a (21, 3) angle-normalized version of the original hand
-          angle: a 3-tuple with the amount of original rotation in the x-, y-, and z- dimensions'''
-  axes = [
-    np.array([1,0,0]), np.array([0,1,0]), np.array([0,0,1])]
-  mask = np.array([1,1,1])
-  knuckle = arr[9]
-  wrist = arr[0]
-  knuckle_point = np.array([knuckle.x - wrist.x, knuckle.y - wrist.y, knuckle.z - wrist.z])
-  #to find the rot angle (e.g. x) we want to find angle btwn  [1,0,0] and [0,y,z], subsequent x term should be 0
-  angle = tuple(map(lambda x: angle_between(np.multiply(knuckle_point,np.subtract(mask,x)),x)), axes)
-  new_hand = normalize_np_hand(hand)
-  return new_hand, angle
+  ''' Rotates a hand such that the vector between points 1 and 5 are aligned with the vertical  
+      Returns (new hand, the angles in tuple format)'''
+  angles = get_hand_angle(hand)
+  around_up_angle, around_right_angle, around_out_angle = angles
+  new_hand = np.zeros(hand.shape)
+  for i, landmark in enumerate(hand):
+    new_hand[i] = rotate_vector(landmark, around_up_angle, around_right_angle, around_out_angle)
+  return new_hand, angles
 
 def create_directory_if_needed(dirname, verbose=False):
   ''' Creates a directory if it does not exist. If it does exist, nothing happens '''
