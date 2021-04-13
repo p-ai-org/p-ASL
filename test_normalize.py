@@ -1,17 +1,21 @@
 import numpy as np
-from utilities.util import normalize
+from utilities.util import *
 
 
-one_data = np.load('data/classifier_data/ONE.npy') 
+one_data = np.load('data/raw_data/FIVE.npy') 
 quant = 1
+RATIO = 480.0/640.0
 
 def hand():
     for data in one_data[:quant]:
         plot_hand(data)
 def normalized():
     for data in one_data[:quant]:
-        plot_hand(normalize(data)[0])
-    plt.show()
+        plot_hand(normalize(data, 0.2)[0])
+def scale():
+    for hand in one_data[:quant]:
+       hand[:, 1]*=0.2
+       plot_hand(hand) 
 
 def check_scale():
     raw_hand = one_data[0]
@@ -28,4 +32,4 @@ def check_scale():
         angles += [angle_between(pair[0], pair[1]) for pair in pairs]
     print(angles)
 
-check_scale()
+

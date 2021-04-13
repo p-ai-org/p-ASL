@@ -248,7 +248,29 @@ def rotate_vector(vector, around_up_angle, around_right_angle, around_out_angle)
   new_vec = rotate_around_right(new_vec, around_right_angle)
   new_vec = rotate_around_out(new_vec, around_out_angle)
   return new_vec
-  
+
+def normalize(hand, size=True, angle=False):
+  ''' Normalize a hand. Options for normalizing size and angle  
+      Returns (normalized hand, angle in tuple format)'''
+  hand = hand.copy()
+  # hand[:, 1] *= ratio
+  angles = (0, 0, 0)
+  if angle:
+    hand, angles = normalize_hand_angle(hand)
+  if size:
+    hand = normalize_size(hand)
+  return hand, angles
+
+def normalize_hand_angle(hand):
+  ''' Rotates a hand such that the vector between points 1 and 5 are aligned with the vertical  
+      Returns (new hand, the angles in tuple format)'''
+  angles = get_hand_angle(hand)
+  around_up_angle, around_right_angle, around_out_angle = angles
+  new_hand = np.zeros(hand.shape)
+  for i, landmark in enumerate(hand):
+    new_hand[i] = rotate_vector(landmark, around_up_angle, around_right_angle, around_out_angle)
+  return new_hand, angles
+
 def create_directory_if_needed(dirname, verbose=False):
   ''' Creates a directory if it does not exist. If it does exist, nothing happens '''
   if os.path.isdir(dirname):
@@ -295,6 +317,9 @@ def plot_hand(hand):
   ax.set_xlabel('X (RIGHT)')
   ax.set_ylabel('Y (UP)')
   ax.set_zlabel('Z (OUT)')
+  ax.set_xlim([-1,1])
+  ax.set_ylim([-1,1])
+  ax.set_zlim([-1,1 ])
   for section in traces:
     x, y, z = hand[trace_filter(section)][:,0], hand[trace_filter(section)][:,1], hand[trace_filter(section)][:,2]   
     ax.plot(x, y, z, color = 'b')

@@ -15,7 +15,7 @@ CONFIDENCE_THRESHOLD = 0.9
 RESET_LENGTH = 0.05
 TIME_THRESHOLD_IN_SEC = 0.3
 
-MODEL_NAME = 'fingerspelling_nn'
+MODEL_NAME = 'recognizer_nn'
 USE_SVM = False
 
 SHOW_HAND = True
