@@ -317,9 +317,7 @@ def plot_hand(hand):
   ax.set_xlabel('X (RIGHT)')
   ax.set_ylabel('Y (UP)')
   ax.set_zlabel('Z (OUT)')
-  ax.set_xlim([-1,1])
-  ax.set_ylim([-1,1])
-  ax.set_zlim([-1,1 ])
+  ax.axis('equal')
   for section in traces:
     x, y, z = hand[trace_filter(section)][:,0], hand[trace_filter(section)][:,1], hand[trace_filter(section)][:,2]   
     ax.plot(x, y, z, color = 'b')
