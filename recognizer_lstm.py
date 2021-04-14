@@ -20,8 +20,8 @@ FEATURES = 6
 CORPUS_DIR = MOTION_CORPUS_DIR
 
 # Whether to save this model or not
-SAVE = False
-SAVE_FNAME = 'lstm'
+SAVE = True
+SAVE_FNAME = 'motion_lstm'
 
 def evaluate_cm(classifier, X_test, y_test):
   ''' Makes predictions using classifier and displays confusion matrix of actual v. predicted '''
@@ -32,9 +32,19 @@ def evaluate_cm(classifier, X_test, y_test):
 def buildModel(dropout_rate=0.3):
   ''' Build neural network '''
   model = Sequential()
-  model.add(LSTM(50, input_shape=(TIMESTEPS, FEATURES)))
-  # model.add(Dense(64, activation='relu'))
-  # model.add(Dropout(dropout_rate))
+  model.add(LSTM(100, input_shape=(TIMESTEPS, FEATURES)))
+  model.add(Dense(64))
+  model.add(Dropout(dropout_rate))
+  model.add(Dense(32))
+  model.add(Dense(N_CLASSES, activation='softmax'))
+  return model
+
+def buildBaselineModel(dropout_rate=0.3):
+  ''' Build neural network '''
+  model = Sequential()
+  model.add(LSTM(100, input_shape=(TIMESTEPS, FEATURES)))
+  model.add(Dense(64))
+  model.add(Dropout(dropout_rate))
   model.add(Dense(32))
   model.add(Dense(N_CLASSES, activation='softmax'))
   return model
