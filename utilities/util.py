@@ -253,7 +253,6 @@ def normalize(hand, size=True, angle=False):
   ''' Normalize a hand. Options for normalizing size and angle  
       Returns (normalized hand, angle in tuple format)'''
   hand = hand.copy()
-  # hand[:, 1] *= ratio
   angles = (0, 0, 0)
   if angle:
     hand, angles = normalize_hand_angle(hand)
@@ -317,7 +316,13 @@ def plot_hand(hand):
   ax.set_xlabel('X (RIGHT)')
   ax.set_ylabel('Y (UP)')
   ax.set_zlabel('Z (OUT)')
-  ax.axis('equal')
+  
+  ax_len = max([hand[:,i].max() - hand[:,i].min() for i in range(3)])
+
+  ax.set_xlim(hand[:,0].max() - ax_len, hand[:,0].max())
+  ax.set_ylim(hand[:,1].max() - ax_len, hand[:,1].max())
+  ax.set_zlim(hand[:,2].max() - ax_len, hand[:,2].max())
+
   for section in traces:
     x, y, z = hand[trace_filter(section)][:,0], hand[trace_filter(section)][:,1], hand[trace_filter(section)][:,2]   
     ax.plot(x, y, z, color = 'b')

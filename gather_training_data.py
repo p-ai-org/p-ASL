@@ -22,8 +22,7 @@ FNAME = 'ONE'
 ''' Where to save this data ''' 
 # SAVE_DIR = LETTER_DATA_DIR
 # SAVE_DIR = CLASSIFIER_DATA_DIR
-# SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
-SAVE_DIR = 'data/raw_data/'
+SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
 NORMALIZE_ANGLE = False
 # What will end up being the dataset collected during this session
 dataset = np.empty((1, NUM_POINTS, NUM_DIM))
@@ -52,8 +51,11 @@ while cap.isOpened():
     for hand_landmarks in results.multi_hand_landmarks:
       # Get landmarks in np format
       hand_np_raw = landmarks_to_np(hand_landmarks.landmark)
+      hand_np_raw[:,1]*= HEIGHT/WIDTH
+      # flips axes
+      hand_np_raw[:,1:]*=-1
       # Normalize size (and angle, if desired)
-      hand_np, _ = normalize(hand_np_raw, HEIGHT/WIDTH, size=True, angle=NORMALIZE_ANGLE)
+      hand_np, _ = normalize(hand_np_raw, size=True, angle=NORMALIZE_ANGLE)
       # Concatenate all the hand landmarks to the dataset
       dataset = np.concatenate((dataset, [hand_np_raw]))
       # Print the current size of the dataset
