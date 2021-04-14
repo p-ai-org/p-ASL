@@ -97,7 +97,7 @@ def get_x_rot(arr):
   knuckle = arr[9]
   wrist = arr[0]
   knuckle_point = -np.array([knuckle.x - wrist.x, knuckle.y - wrist.y, knuckle.z - wrist.z])
-  angle = angle_between(knuckle_point, UP)
+  angle = angle_between(knuckle_point, [0, 1, 0])
   return angle if knuckle.z < wrist.z else -angle
 
 def landmarks_to_np(landmark):
@@ -219,7 +219,7 @@ def get_hand_angle(hand, verbose=False):
     print(f"Up-down angle: {around_right_angle} radians")
     print(f"Plane-aligned vector: {aligned_vector}")
   # Check that the plane is aligned
-  if not np.allclose(aligned_vector, np.array([0, 0, 1])):
+  if not np.allclose(aligned_vector, np.array(OUT)):
     print(f"[WARNING]: PALM NORMAL VECTOR DID NOT ALIGN WITH PLANE: {aligned_vector}")
 
   # Now that we can align the palm of the hand, let's find the angle needed to "wave" the hand to point up
