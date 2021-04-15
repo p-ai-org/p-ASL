@@ -1,5 +1,5 @@
 from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from joblib import dump
 from utilities.reference import *
 from utilities.util import *
@@ -18,8 +18,8 @@ CORPUS_DIR = CLASSIFIER_CORPUS_DIR
 SAVE = True
 SAVE_FNAME = 'svm_non_norm'
 
-def trainSVM(X_train, y_train):
-  model = SVC(gamma='auto', probability=True)
+def trainRF(X_train, y_train):
+  model = RandomForestClassifier()
   print("Training model... (this can take a while)")
   model.fit(X_train, y_train)
   return model
@@ -28,7 +28,7 @@ X, y = retrieve_Xy_data(corpus_dir=CORPUS_DIR)
 print(f"X shape: {X.shape}")
 print(f"y shape: {y.shape}")
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
-model = trainSVM(X_train, y_train)
+model = trainRF(X_train, y_train)
 ml_utils.evaluate_and_plot_cm(model, X_test, y_test, labels=CATEGORIES, keras=False)
 
 if SAVE:
