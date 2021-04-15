@@ -9,21 +9,24 @@ mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
 cap = cv2.VideoCapture(0)
-WIDTH = cap.get(3)
-HEIGHT = cap.get(4)
-print()
-# Constants
-DATASET_SIZE = 1000
+''' Constants '''
+DATASET_SIZE = 10
 SHUTTER_TIME = 1 * cap.get(cv2.CAP_PROP_FPS)
 SHUTTER = False
+# Get video dimensions
+WIDTH = cap.get(3)
+HEIGHT = cap.get(4)
+RATIO = HEIGHT / WIDTH
 # What to name this numpy file
-FNAME = 'ONE'
+FNAME = 'test'
 
 ''' Where to save this data ''' 
 # SAVE_DIR = LETTER_DATA_DIR
-# SAVE_DIR = CLASSIFIER_DATA_DIR
-SAVE_DIR = CLASSIFIER_NORM_DATA_DIR
-NORMALIZE_ANGLE = False
+# SAVE_DIR = CLASSIFIER_ANYANGLE_DIR
+# SAVE_DIR = CLASSIFIER_FORCED_DIR
+SAVE_DIR = CLASSIFIER_UPRIGHT_DIR
+
+NORMALIZE_ANGLE = True
 # What will end up being the dataset collected during this session
 dataset = np.empty((1, NUM_POINTS, NUM_DIM))
 done = False
@@ -51,15 +54,12 @@ while cap.isOpened():
     for hand_landmarks in results.multi_hand_landmarks:
       # Get landmarks in np format
       hand_np_raw = landmarks_to_np(hand_landmarks.landmark)
-      hand_np_raw[:,1]*= HEIGHT/WIDTH
-      # flips axes
-      hand_np_raw[:,1:]*=-1
-      # Normalize size (and angle, if desired)
-      hand_np, _ = normalize(hand_np_raw, size=True, angle=NORMALIZE_ANGLE)
+      # Normalize
+      hand_np, _ = normalize_hand(hand_np_raw, screenRatio=RATIO, rotate=NORMALIZE_ANGLE)
       # Concatenate all the hand landmarks to the dataset
-      dataset = np.concatenate((dataset, [hand_np_raw]))
+      dataset = np.concatenate((dataset, [hand_np]))
       # Print the current size of the dataset
-      print(dataset.shape[0] - 1)
+      print(f"[size] : {dataset.shape[0] - 1}")
       # If reached desired size, finish up
       if dataset.shape[0] - 1 == DATASET_SIZE:
         dataset = dataset[1:]

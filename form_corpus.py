@@ -1,16 +1,17 @@
 from utilities.util import *
 
-name_directory_corpus = [
-  (LETTERS, LETTER_DATA_DIR, LETTER_CORPUS_DIR),
-  (CLASSIFIERS, CLASSIFIER_DATA_DIR, CLASSIFIER_CORPUS_DIR),
-  (CLASSIFIERS, CLASSIFIER_NORM_DATA_DIR, CLASSIFIER_NORM_CORPUS_DIR)
+name_directory = [
+  (LETTERS, LETTER_DIR),
+  (CLASSIFIERS, CLASSIFIER_ANYANGLE_DIR),
+  (CLASSIFIERS, CLASSIFIER_FORCED_DIR),
+  (CLASSIFIERS, CLASSIFIER_UPRIGHT_DIR)
 ]
 
 # Hand data
-for name, directory, corpus in name_directory_corpus:
-  print(f"Saving {directory} to {corpus}")
-  save_Xy_data(corpus_dir=corpus, names=name, data_dir=directory)
+for name, directory in name_directory:
+  print(f"Saving {directory}")
+  save_Xy_data(names=name, data_dir=directory)
 
 # Motion data
 print("Saving motion data")
-save_Xy_data_motion(timesteps=30)
+save_Xy_data_motion(names=MOTIONS, data_dir=MOTION_DIR, timesteps=30)

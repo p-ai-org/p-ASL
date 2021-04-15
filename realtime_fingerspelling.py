@@ -15,13 +15,15 @@ CONFIDENCE_THRESHOLD = 0.9
 RESET_LENGTH = 0.05
 TIME_THRESHOLD_IN_SEC = 0.3
 
-MODEL_NAME = 'recognizer_nn'
-USE_SVM = False
+MODEL_NAME = 'fingerspelling_nn'
+KERAS = True
 
 SHOW_HAND = True
 
 build_str = ''
 cap = cv2.VideoCapture(0)
+# Get video dimensions
+RATIO = cap.get(4) / cap.get(3)
 consistency_counter = 0
 half_reset = False
 reset = False
@@ -32,10 +34,10 @@ last_pred = None
 last_letter = None
 time_threshold_in_frames = TIME_THRESHOLD_IN_SEC * cap.get(cv2.CAP_PROP_FPS)
 
-if USE_SVM:
-  recognizer = load(f"{MODEL_DIR}{MODEL_NAME}")
-else:
+if KERAS:
   recognizer = tf.keras.models.load_model(f"{MODEL_DIR}{MODEL_NAME}")
+else:
+  recognizer = load(f"{MODEL_DIR}{MODEL_NAME}")
 
 def classify(hand_np):
   ''' Classifies a hand, given the hand in (21, 3)  
@@ -43,10 +45,10 @@ def classify(hand_np):
   # Flatten to (1, 63)
   hand_np_flat = np.array([flatten_hand(hand_np)])
   # Get probability distribution with classifier
-  if USE_SVM:
-    probs = recognizer.predict_proba(hand_np_flat)[0]
-  else:
+  if KERAS:
     probs = recognizer.predict(hand_np_flat)[0]
+  else:
+    probs = recognizer.predict_proba(hand_np_flat)[0]
   pred_index = np.argmax(probs)
   letter_pred = index_to_letter(int(round(pred_index)))
   return probs, pred_index, letter_pred
@@ -68,7 +70,7 @@ while cap.isOpened():
     for hand_landmarks in results.multi_hand_landmarks:
       # Shape (21, 3)
       hand_np_raw = landmarks_to_np(hand_landmarks.landmark)
-      hand_np, _ = normalize(hand_np_raw, size=True, angle=False)
+      hand_np, _ = normalize_hand(hand_np_raw, screenRatio=RATIO)
       
       dist_from_last_detection = euclidian_distance(
         last_detected_mean, 

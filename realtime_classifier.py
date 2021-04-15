@@ -17,26 +17,28 @@ CONFIDENCE_THRESHOLD = 0
 TIME_THRESHOLD_IN_SEC = 0
 
 # Which model to use
-MODEL_NAME = 'recognizer_nn'
+MODEL_NAME = 'forcedangle_rf'
 # Set to true if model is a SVM
-USE_SVM = False
+KERAS = False
 # Whether to normalize the hand to be facing outward (in theory)
-NORMALIZE_ANGLE = False
+NORMALIZE_ANGLE = True
 
 # Show the landmarks in the video
 SHOW_HAND = True
 
 cap = cv2.VideoCapture(0)
+# Get video dimensions
+RATIO = cap.get(4) / cap.get(3)
 consistency_counter = 0
 hands = mp_hands.Hands(
   min_detection_confidence=0.7, min_tracking_confidence=0.7, max_num_hands=1)
 last_pred = None
 time_threshold_in_frames = TIME_THRESHOLD_IN_SEC * cap.get(cv2.CAP_PROP_FPS)
 
-if USE_SVM:
-  recognizer = load(f"{MODEL_DIR}{MODEL_NAME}")
-else:
+if KERAS:
   recognizer = tf.keras.models.load_model(f"{MODEL_DIR}{MODEL_NAME}")
+else:
+  recognizer = load(f"{MODEL_DIR}{MODEL_NAME}")
 
 def classify(hand_np):
   ''' Classifies a hand, given the hand in (21, 3)  
@@ -44,12 +46,12 @@ def classify(hand_np):
   # Flatten to (1, 63)
   hand_np_flat = np.array([flatten_hand(hand_np)])
   # Get probability distribution with classifier
-  if USE_SVM:
-    probs = recognizer.predict_proba(hand_np_flat)[0]
-  else:
+  if KERAS:
     probs = recognizer.predict(hand_np_flat)[0]
+  else:
+    probs = recognizer.predict_proba(hand_np_flat)[0]
   pred_index = np.argmax(probs)
-  classifier_pred = index_to_letter(int(round(pred_index)))
+  classifier_pred = index_to_classifier(int(round(pred_index)))
   return probs, pred_index, classifier_pred
 
 while cap.isOpened():
@@ -68,7 +70,7 @@ while cap.isOpened():
       # Turn landmarks into a (21, 3) np array
       hand_np_raw = landmarks_to_np(hand_landmarks.landmark)
       # Apply normalization
-      hand_np, angles = normalize(hand_np_raw, size=True, angle=NORMALIZE_ANGLE)
+      hand_np, angles = normalize_hand(hand_np_raw, screenRatio=RATIO, rotate=NORMALIZE_ANGLE)
 
       angle_text = f"Rotation (up, right, out): {[round(x, 3) for x in angles]}"
       image = cv2utils.add_text(image, text=angle_text, right=100, top=200, color=(255, 255, 255), size=0.5)

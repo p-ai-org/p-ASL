@@ -10,14 +10,17 @@ import utilities.ml_utils as ml_utils
 # CATEGORIES = LETTERS
 CATEGORIES = CLASSIFIERS
 
-# Which corpus to use
-# CORPUS_DIR = LETTER_CORPUS_DIR
-# CORPUS_DIR = CLASSIFIER_CORPUS_DIR
-CORPUS_DIR = CLASSIFIER_NORM_CORPUS_DIR
+''' Which corpus are we using? '''
+# DATASET_DIR = LETTER_DIR
+DATASET_DIR = CLASSIFIER_ANYANGLE_DIR
+# DATASET_DIR = CLASSIFIER_FORCED_DIR
+# DATASET_DIR = CLASSIFIER_UPRIGHT_DIR
+
+CORPUS_DIR = DATASET_DIR + CORPUS_SUFFIX
 
 # Whether to save this model or not
-SAVE = True
-SAVE_FNAME = 'classifier_norm'
+SAVE = False
+SAVE_FNAME = 'cnn_model'
 
 def buildModel(dropout_rate=0.3):
   ''' Build neural network '''

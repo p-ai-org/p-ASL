@@ -10,20 +10,14 @@ NUM_DIM = 3
 NUM_POINTS = 21
 
 DATA_DIR = 'data/'
-
-LETTER_DATA_DIR = DATA_DIR + 'letter_data/'
-LETTER_CORPUS_DIR = LETTER_DATA_DIR + 'corpus/'
-
-CLASSIFIER_DATA_DIR = DATA_DIR + 'classifier_data/'
-CLASSIFIER_CORPUS_DIR = CLASSIFIER_DATA_DIR + 'corpus/'
-
-CLASSIFIER_NORM_DATA_DIR = DATA_DIR + 'classifier_norm_data/'
-CLASSIFIER_NORM_CORPUS_DIR = CLASSIFIER_NORM_DATA_DIR + 'corpus/'
-
-MOTION_DATA_DIR = DATA_DIR + 'motion_data/'
-MOTION_CORPUS_DIR = MOTION_DATA_DIR + 'corpus/'
-
 MODEL_DIR = 'models/'
+CORPUS_SUFFIX = 'corpus/'
+
+LETTER_DIR = DATA_DIR + 'letter_data/'
+CLASSIFIER_ANYANGLE_DIR = DATA_DIR + 'classifier_data_anyangle/'
+CLASSIFIER_FORCED_DIR = DATA_DIR + 'classifier_data_forced/'
+CLASSIFIER_UPRIGHT_DIR = DATA_DIR + 'classifier_data_upright/'
+MOTION_DIR = DATA_DIR + 'motion_data/'
 
 # Define canonical directions in the order that MediaPipe presents it
 UP = np.array([0, 1, 0])
@@ -82,6 +76,7 @@ def get_normal_from_three_pts(p1, p2, p3):
 def normalize_size(hand):
   ''' Translates the hand so its center lies at (0, 0, 0)  
       Also scales such that the largest vector has magnitude 1 '''
+  hand = hand.copy()
   mean = get_center_of_hand(hand)
   centered = np.subtract(hand, mean)
   max_mag = max([np.linalg.norm(x) for x in centered])
@@ -135,7 +130,7 @@ def euclidian_distance(v1, v2, z_scale=1):
   else:
     return np.linalg.norm(v2 - v1)
 
-def create_Xy_data(names=LETTERS, data_dir=LETTER_DATA_DIR):
+def create_Xy_data(names, data_dir):
   ''' Compile all individual sign numpy files into X and y data '''
   X = np.zeros((1, NUM_POINTS * NUM_DIM))
   y = []
@@ -146,36 +141,38 @@ def create_Xy_data(names=LETTERS, data_dir=LETTER_DATA_DIR):
   y = np.array(y)
   return X[1:], y
 
-def create_Xy_data_motion(timesteps=30):
+def create_Xy_data_motion(names, data_dir, timesteps=30):
   ''' Compile all individual motion numpy files into X and y data '''
   X = np.zeros((1, timesteps, NUM_DIM * 2))
   y = []
-  for i, name in enumerate(MOTIONS):
-    data = np.load(f'{MOTION_DATA_DIR}{name}.npy')
+  for i, name in enumerate(names):
+    data = np.load(f'{data_dir}{name}.npy')
     X = np.concatenate((X, data))
     y += [i] * len(data)
   y = np.array(y)
   return X[1:], y
 
-def save_Xy_data(corpus_dir=LETTER_CORPUS_DIR, names=LETTERS, data_dir=LETTER_DATA_DIR):
+def save_Xy_data(names, data_dir):
+  corpus_dir = data_dir + CORPUS_SUFFIX
   ''' Compiles all the numpy files in data_dir into X.npy and y.npy and saves to corpus_dir '''
   X, y = create_Xy_data(names=names, data_dir=data_dir)
   create_directory_if_needed(corpus_dir)
   np.save(f'{corpus_dir}X.npy', X)
   np.save(f'{corpus_dir}y.npy', y)
 
-def save_Xy_data_motion(timesteps=30):
+def save_Xy_data_motion(names, data_dir, timesteps=30):
   ''' Compiles all the numpy files for motion into a corpus dir '''
-  X, y = create_Xy_data_motion(timesteps=timesteps)
-  create_directory_if_needed(MOTION_CORPUS_DIR)
-  np.save(f'{MOTION_CORPUS_DIR}X.npy', X)
-  np.save(f'{MOTION_CORPUS_DIR}y.npy', y)
+  corpus_dir = data_dir + CORPUS_SUFFIX
+  X, y = create_Xy_data_motion(names=names, data_dir=data_dir, timesteps=timesteps)
+  create_directory_if_needed(corpus_dir)
+  np.save(f'{corpus_dir}X.npy', X)
+  np.save(f'{corpus_dir}y.npy', y)
 
-def retrieve_Xy_data(corpus_dir=LETTER_CORPUS_DIR):
+def retrieve_Xy_data(corpus_dir):
   ''' Fetch the X and y data from a corpus directory '''
   return np.load(f"{corpus_dir}X.npy"), np.load(f"{corpus_dir}y.npy")
 
-def plot_cm(y_pred, y_test, categories=LETTERS):
+def plot_cm(y_pred, y_test, categories):
   ''' Plot a confusion matrix from predictions and actual labels '''
   cm = confusion_matrix(y_test, y_pred)
   make_confusion_matrix(cm, categories=categories, percent=False)
@@ -260,6 +257,29 @@ def normalize(hand, size=True, angle=False):
     hand = normalize_size(hand)
   return hand, angles
 
+def normalize_hand(hand, screenRatio=1, origin_center=True, scaleSize=True, leftHand=False, rotate=False):
+  angles = None
+  hand = hand.copy()
+  # Flip y and z to match intuition
+  hand[:, 1:] *= -1
+  # Multiply y by screenRatio so axes are roughly equivalent
+  hand[:, 1] *= screenRatio
+  # If left hand, flip x
+  if leftHand:
+    hand[:, 0] *= -1
+  # Translate hand to be centered around the origin
+  if origin_center:
+    mean = np.mean(hand, axis=0)
+    hand = np.subtract(hand, mean)
+  # Scale the hand such that the longest vector has length 1
+  if scaleSize:
+    max_mag = max([np.linalg.norm(x) for x in hand])
+    hand = np.divide(hand, max_mag)
+  # Rotate hand to be facing "outward" e.g. toward the camera
+  if rotate:
+    hand, angles = normalize_hand_angle(hand)
+  return hand, angles
+
 def normalize_hand_angle(hand):
   ''' Rotates a hand such that the vector between points 1 and 5 are aligned with the vertical  
       Returns (new hand, the angles in tuple format)'''
@@ -280,7 +300,7 @@ def create_directory_if_needed(dirname, verbose=False):
   if verbose:
     print(f"[create_directory_if_needed] Directory '{dirname}' created.")
 
-def normalize_directory(directory, new_directory='NORMALIZED_DEFAULT_DIR/', size=True, angle=False):
+def normalize_directory(directory, new_directory='NORMALIZED_DEFAULT_DIR/', screenRatio=1, rotate=False):
   ''' Angle-normalizes and saves all np files in directory to new_directory '''
   if directory == new_directory:
     print("[angle_normalize_directory]: WARNING: You are replacing existing files")
@@ -294,7 +314,7 @@ def normalize_directory(directory, new_directory='NORMALIZED_DEFAULT_DIR/', size
     # Iterate through each hand in file
     for i, hand in enumerate(hands):
       # Angle normalize and replace existing hand
-      normalized_hand, _ = normalize(hand, size=size, angle=angle)
+      normalized_hand, _ = normalize_hand(hand, screenRatio=screenRatio, rotate=rotate)
       hands[i] = normalized_hand
     # Replace filename with new sign file
     np.save(f"{new_directory}{file}", hands)
