@@ -18,6 +18,7 @@ CLASSIFIER_ANYANGLE_DIR = DATA_DIR + 'classifier_data_anyangle/'
 CLASSIFIER_FORCED_DIR = DATA_DIR + 'classifier_data_forced/'
 CLASSIFIER_UPRIGHT_DIR = DATA_DIR + 'classifier_data_upright/'
 MOTION_DIR = DATA_DIR + 'motion_data/'
+HOLISTIC_DIR = DATA_DIR + 'holistic_data/'
 
 # Define canonical directions in the order that MediaPipe presents it
 UP = np.array([0, 1, 0])
