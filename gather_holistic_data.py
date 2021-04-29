@@ -20,21 +20,26 @@ FNAME = 'FULL_BODY_TEST'
 print(FNAME)
 # How many frames to give to "reset"
 FRAMES_PER_RESET = 40
+# Get screen ratio
+RATIO = cap.get(4) / cap.get(3)
 
 ''' Where to save this data '''
 SAVE_DIR = HOLISTIC_DIR 
+
+DATASET_DIMS = (FRAMES_PER_SAMPLE, ((NUM_DIM - 1) * 2) + (NUM_DIM * NUM_POINTS * 2))
 
 # Load MediaPipe model
 holistic = mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
 # What will end up being the dataset collected during this session
-dataset = np.empty((1, FRAMES_PER_SAMPLE, ((NUM_DIM - 1) * 2) + (NUM_DIM * NUM_POINTS *2)))
+dataset = np.empty((1, DATASET_DIMS[0], DATASET_DIMS[1]))
 
 count = 0
 reset_count = 0
 reset_period = False
 
-this_sample = np.empty((FRAMES_PER_SAMPLE + 1, ((NUM_DIM - 1) * 2) + (NUM_DIM * NUM_POINTS *2)))
+# Add one to timesteps because last one is always messed up
+this_sample = np.empty((DATASET_DIMS[0] + 1, DATASET_DIMS[1]))
 
 # bools for ensuring we don't start collecting data until hands are found
 left_found = False
@@ -62,8 +67,6 @@ while cap.isOpened():
   image, results = cv2utils.process_and_identify_landmarks(image, holistic)
 
   # Draw landmark annotation on the image.
-  image.flags.writeable = True
-  image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
   mp_drawing.draw_landmarks(
       image, results.face_landmarks, mp_holistic.FACE_CONNECTIONS)
   mp_drawing.draw_landmarks(
@@ -92,10 +95,14 @@ while cap.isOpened():
     
     # Updating hand landmarks if they are found again
     if results.right_hand_landmarks:
-      right_hand_points_np = landmarks_to_np(results.right_hand_landmarks.landmark).flatten()
+      right_hand_points_np = landmarks_to_np(results.right_hand_landmarks.landmark)
+      right_hand_points_norm, _ = normalize_hand(right_hand_points_np, screenRatio=RATIO)
+      right_hand_points = right_hand_points_norm.flatten()
     
     if results.left_hand_landmarks:
-      left_hand_points_np = landmarks_to_np(results.left_hand_landmarks.landmark).flatten()
+      left_hand_points_np = landmarks_to_np(results.left_hand_landmarks.landmark)
+      left_hand_points_norm, _ = normalize_hand(left_hand_points_np, screenRatio=RATIO, leftHand=True)
+      left_hand_points = left_hand_points_norm.flatten()
     
     torso_width = (pose_np[11] - pose_np[12])[0]
     torso_height = (pose_np[23] - pose_np[11])[1]
@@ -120,7 +127,7 @@ while cap.isOpened():
     # Add dataset count
     image = cv2utils.add_text(image, text=str(dataset.shape[0]-1), right=50, top=500, size=3, color=(255,255,0), thickness=3)
 
-    timestep = np.concatenate((left_hand_pos,right_hand_pos,right_hand_points_np,left_hand_points_np))
+    timestep = np.concatenate((left_hand_pos, right_hand_pos, right_hand_points, left_hand_points))
     
     # Add this timestep to the current sample
     this_sample[count] = timestep
@@ -148,8 +155,6 @@ while cap.isOpened():
     break
 pose.close()
 cap.release()
-
-
 
 ''' Save database '''
 create_directory_if_needed(SAVE_DIR)
