@@ -17,7 +17,7 @@ CONFIDENCE_THRESHOLD = 0
 TIME_THRESHOLD_IN_SEC = 0
 
 # Which model to use
-MODEL_NAME = 'forcedangle_rf'
+MODEL_NAME = 'forced_rf'
 # Set to true if model is a SVM
 KERAS = False
 # Whether to normalize the hand to be facing outward (in theory)

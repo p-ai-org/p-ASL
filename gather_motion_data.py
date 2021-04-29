@@ -19,7 +19,7 @@ FNAME = 'MOVE_APART'
 FRAMES_PER_RESET = 30
 
 ''' Where to save this data '''
-SAVE_DIR = MOTION_DATA_DIR
+SAVE_DIR = MOTION_DIR
 
 # Load MediaPipe model
 pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, upper_body_only=False)
@@ -52,9 +52,6 @@ while cap.isOpened():
   # Process and get hands
   image, results = cv2utils.process_and_identify_landmarks(image, pose)
   
-  # Draw the pose annotation on the image.
-  image.flags.writeable = True
-  image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
   mp_drawing.draw_landmarks(
       image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
