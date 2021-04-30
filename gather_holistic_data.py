@@ -13,10 +13,10 @@ mp_holistic = mp.solutions.holistic
 cap = cv2.VideoCapture(0)
 
 # Constants
-DATASET_SIZE = 50
+DATASET_SIZE = 12
 FRAMES_PER_SAMPLE = 30
 # What to name this numpy file
-FNAME = 'FULL_BODY_TEST'
+FNAME = 'L_ABOVE_FIVE'
 print(FNAME)
 # How many frames to give to "reset"
 FRAMES_PER_RESET = 40
@@ -95,14 +95,14 @@ while cap.isOpened():
     
     # Updating hand landmarks if they are found again
     if results.right_hand_landmarks:
-      right_hand_points_np = landmarks_to_np(results.right_hand_landmarks.landmark)
-      right_hand_points_norm, _ = normalize_hand(right_hand_points_np, screenRatio=RATIO)
-      right_hand_points = right_hand_points_norm.flatten()
+      right_hand_points = landmarks_to_np(results.right_hand_landmarks.landmark)
+      right_hand_points, _ = normalize_hand(right_hand_points, screenRatio=RATIO)
+      right_hand_points = right_hand_points.flatten()
     
     if results.left_hand_landmarks:
-      left_hand_points_np = landmarks_to_np(results.left_hand_landmarks.landmark)
-      left_hand_points_norm, _ = normalize_hand(left_hand_points_np, screenRatio=RATIO, leftHand=True)
-      left_hand_points = left_hand_points_norm.flatten()
+      left_hand_points = landmarks_to_np(results.left_hand_landmarks.landmark)
+      left_hand_points, _ = normalize_hand(left_hand_points, screenRatio=RATIO, leftHand=True)
+      left_hand_points = left_hand_points.flatten()
     
     torso_width = (pose_np[11] - pose_np[12])[0]
     torso_height = (pose_np[23] - pose_np[11])[1]
