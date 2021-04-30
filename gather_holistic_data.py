@@ -153,7 +153,7 @@ while cap.isOpened():
   cv2.imshow('Trainer', image)
   if cv2.waitKey(5) & 0xFF == 27:
     break
-pose.close()
+holistic.close()
 cap.release()
 
 ''' Save database '''
