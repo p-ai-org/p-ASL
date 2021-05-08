@@ -31,3 +31,22 @@ def load_data_train_test_suite(model, X, y, labels, batch_size=32, epochs=8, spl
     print(f"Loss: {loss}; accuracy: {accuracy}")
   evaluate_and_plot_cm(model, X_test, y_test, labels=labels, keras=True)
   return model
+
+def encoder_decoder_predict(infenc, infdec, source, n_steps, cardinality):
+  ''' Make a prediction on X input data with an encoder and decoder '''
+	# encode
+	state = infenc.predict(source)
+	# start of sequence input
+	target_seq = np.array([0.0 for _ in range(cardinality)]).reshape(1, 1, cardinality)
+	# collect predictions
+	output = list()
+	for t in range(n_steps):
+		# predict next char
+		yhat, h, c = infdec.predict([target_seq] + state)
+		# store prediction
+		output.append(yhat[0,0,:])
+		# update state
+		state = [h, c]
+		# update target sequence
+		target_seq = yhat
+	return np.array(output)

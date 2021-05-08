@@ -3,6 +3,8 @@ from .reference import *
 from sklearn.metrics import confusion_matrix
 from .confusion_matrix import make_confusion_matrix
 import matplotlib.pyplot as plt
+import random
+import math
 import os
 from tqdm import tqdm
 
@@ -393,3 +395,50 @@ def remove_large_values(data, threshold=5):
   print(to_remove)
   data = [sample for i in range(len(data)) if i not in to_remove]
   return np.array(data)
+
+def parse_holistic_filename(fname):
+  tokens = []
+  split = fname.split('_')
+  # Right hand (subject)
+  tokens.append(split[0])
+  # Motion (verb)
+  if len(split) > 3:
+    tokens.append('_'.join(split[1:3]))
+  else:
+    tokens.append(split[1])
+  # Left hand (object)
+  tokens.append(split[-1][:-4])
+  return tokens
+
+def get_unique_tokens(files):
+  tokens = set()
+  for fname in files:
+    fname_tokens = parse_holistic_filename(fname)
+    for t in fname_tokens:
+      set.add(t)
+  return list(tokens)
+
+def create_holistic_Xy_data(directory):
+  files = os.listdir(directory)
+  files = [f for f in files if os.path.isfile(f"{directory}{f}")]
+  unique_tokens = get_unique_tokens(files)
+  example = np.load(f"{directory}{files[0]}")
+  X = np.zeros((len(files), example.shape[1], example.shape[2]))
+  y = np.zeros((len(files), 3, len(unique_tokens)))
+  for i, fname in enumerate(tqdm(files)):
+    arr = np.load(f"{directory}{fname}")
+    randindex = math.floor(random.random() * len(arr))
+    X[i] = arr[randindex]
+    tokens = parse_holistic_filename(fname)
+    for j in range(3):
+      y[i][j][unique_tokens.index(tokens[j])] = 1
+  return X, y, unique_tokens
+
+def save_holistic_Xy_data(directory):
+  X, y, unique_tokens = create_holistic_Xy_data(directory)
+  create_directory_if_needed(f"{directory}{CORPUS_SUFFIX}")
+  np.save(f"{directory}{CORPUS_SUFFIX}X.npy", X)
+  np.save(f"{directory}{CORPUS_SUFFIX}y.npy", y)
+  with open(f'{directory}{CORPUS_SUFFIX}unique_tokens.txt', 'w+') as f:
+    f.truncate(0)
+    f.writelines([(t + "\n") for t in unique_tokens])
