@@ -34,19 +34,32 @@ def load_data_train_test_suite(model, X, y, labels, batch_size=32, epochs=8, spl
 
 def encoder_decoder_predict(infenc, infdec, source, n_steps, cardinality):
   ''' Make a prediction on X input data with an encoder and decoder '''
-	# encode
-	state = infenc.predict(source)
-	# start of sequence input
-	target_seq = np.array([0.0 for _ in range(cardinality)]).reshape(1, 1, cardinality)
-	# collect predictions
-	output = list()
-	for t in range(n_steps):
-		# predict next char
-		yhat, h, c = infdec.predict([target_seq] + state)
-		# store prediction
-		output.append(yhat[0,0,:])
-		# update state
-		state = [h, c]
-		# update target sequence
-		target_seq = yhat
-	return np.array(output)
+  # encode
+  state = infenc.predict(source)
+  # start of sequence input
+  target_seq = np.array([0.0 for _ in range(cardinality)]).reshape(1, 1, cardinality)
+  # collect predictions
+  output = list()
+  for t in range(n_steps):
+    # predict next char
+    yhat, h, c = infdec.predict([target_seq] + state)
+    # store prediction
+    output.append(yhat[0,0,:])
+    # update state
+    state = [h, c]
+    # update target sequence
+    target_seq = yhat
+  return np.array(output)
+
+def token_lookup(i, location):
+  with open(location, 'r') as f:
+    tokens = f.read().split('\n')[:-1]
+  return tokens[i]
+
+def multiple_token_lookup(indexes, location):
+  res = []
+  with open(location, 'r') as f:
+    tokens = f.read().split('\n')[:-1]
+  for i in indexes:
+    res.append(tokens[i])
+  return res

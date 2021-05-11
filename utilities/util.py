@@ -415,7 +415,7 @@ def get_unique_tokens(files):
   for fname in files:
     fname_tokens = parse_holistic_filename(fname)
     for t in fname_tokens:
-      set.add(t)
+      tokens.add(t)
   return list(tokens)
 
 def create_holistic_Xy_data(directory):
