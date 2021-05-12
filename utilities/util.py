@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 NUM_DIM = 3
 NUM_POINTS = 21
+MOUTH_NUM_POINTS = 80
 
 DATA_DIR = 'data/'
 MODEL_DIR = 'models/'
@@ -21,6 +22,7 @@ CLASSIFIER_FORCED_DIR = DATA_DIR + 'classifier_data_forced/'
 CLASSIFIER_UPRIGHT_DIR = DATA_DIR + 'classifier_data_upright/'
 MOTION_DIR = DATA_DIR + 'motion_data/'
 HOLISTIC_DIR = DATA_DIR + 'holistic_data/'
+MOUTH_MORPHEME_DIR = DATA_DIR + 'mouth_morpheme_data/'
 
 # Define canonical directions in the order that MediaPipe presents it
 UP = np.array([0, 1, 0])
@@ -116,6 +118,13 @@ def pose_landmarks_to_np(landmark, top_half=True):
   if top_half:
     arr = arr[:25]
   return arr
+
+def mouth_landmarks_to_np(face_mesh_landmark, mouth_points_arr):
+  arr = []
+  for point in enumerate(face_mesh_landmark):
+    if point in mouth_points_arr:
+      arr.append([point.x, point.y, point.z])
+  return np.array(arr)
 
 def flatten_hand(arr):
   ''' Flattens hands in (21, 3) to (63) '''
