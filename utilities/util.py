@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 NUM_DIM = 3
 NUM_POINTS = 21
-MOUTH_NUM_POINTS = 80
+MOUTH_NUM_POINTS = 79
 
 DATA_DIR = 'data/'
 MODEL_DIR = 'models/'
@@ -121,8 +121,8 @@ def pose_landmarks_to_np(landmark, top_half=True):
 
 def mouth_landmarks_to_np(face_mesh_landmark, mouth_points_arr):
   arr = []
-  for point in enumerate(face_mesh_landmark):
-    if point in mouth_points_arr:
+  for i, point in enumerate(face_mesh_landmark):
+    if i in mouth_points_arr:
       arr.append([point.x, point.y, point.z])
   return np.array(arr)
 
