@@ -16,3 +16,6 @@ models/
 
 # Testing
 *test_.py
+
+# Generated data
+*.npy

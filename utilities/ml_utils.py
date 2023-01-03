@@ -63,3 +63,27 @@ def multiple_token_lookup(indexes, location):
   for i in indexes:
     res.append(tokens[i])
   return res
+
+def plot_loss(history, n_epochs):
+  loss_train = history.history['loss']
+  loss_val = history.history['val_loss']
+  epochs = range(1, n_epochs + 1)
+  plt.plot(epochs, loss_train, 'g', label='Training loss')
+  plt.plot(epochs, loss_val, 'b', label='Validation loss')
+  plt.title('Training and Validation loss')
+  plt.xlabel('Epochs')
+  plt.ylabel('Loss')
+  plt.legend()
+  plt.show()
+
+def plot_accuracy(history, n_epochs):
+  accuracy_train = history.history['accuracy']
+  accuracy_val = history.history['val_accuracy']
+  epochs = range(1, n_epochs + 1)
+  plt.plot(epochs, accuracy_train, 'g', label='Training accuracy')
+  plt.plot(epochs, accuracy_val, 'b', label='Validation accuracy')
+  plt.title('Training and Validation accuracy')
+  plt.xlabel('Epochs')
+  plt.ylabel('Accuracy')
+  plt.legend()
+  plt.show()
