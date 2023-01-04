@@ -10,11 +10,12 @@ A flawed analogy made between spoken languages and signed languages is that sign
 
 _This project was pursued as a research project under Brown University's [ExploreCSR 2021](https://explorecsr.cs.brown.edu/) program. As a project lead in the Claremont College's ML/AI organization [P-ai](https://p-ai.org), I also took the opportunity to use this project as an introduction to machine learning for five amazing students._
 
-<div width="100%" style="text-align: center;">
+<p align="center">
   <img src="src/pasl-members.png" width="500px"/>
   <br />
   <i>Some members of p-ASL hard at work</i>
-</div>
+</p>
+<br />
 
 ## Data collection
 
@@ -42,17 +43,19 @@ To ensure that both handshapes and motions could be accurately identified, we tr
 
 Random forests, SVMs, regular Neural Nets and CNNs were all able to classify the handshapes with relative ease, although the random forest and SVM took the longest to train. In order to ensure robustness, the handshape data was augmented by performing random rotations. The following is a confusion matrix of the classification results of the CNN on static handshapes:
 
-<div width="100%" style="text-align: center;">
+<p align="center">
   <img src="src/classifier_non_norm_normed_robust.png" width="500px"/>
   <br />
   <i>Classification on static handshapes is very accurate and precise</i>
-</div>
+</p>
+<br />
 
 Additionally, we trained an LSTM on the nine possible motions to ensure that they could be learned. We saw similarly strong performance, although similar motions could be mistaken for one another.
 
-<div width="100%" style="text-align: center;">
+<p align="center">
   <img src="src/motion_robust.png" width="500px"/>
-</div>
+</p>
+<br />
 
 ## Setup
 
@@ -66,10 +69,12 @@ Our `X` data has the shape `(8649, 30, 130)`, as explained in the data collectio
 
 Using an LSTM-based encoder-decoder model, we were able to achieve 83.3% accuracy on unseen handshape + motion combinations.
 
-<div width="100%" style="text-align: center;">
+<p align="center">
   <img src="src/loss_and_examples.png" width="500px"/>
+  <br />
   <i>Training and validation loss and accuracy, with examples</i>
-</div>
+</p>
+<br />
 
 We found this to be very impressive! Given raw data about key landmark points on the hands over time and given example "sentences", a relatively simple model architecture was able to learn to generalize the syntax to novel combinations after few training epochs.
 
