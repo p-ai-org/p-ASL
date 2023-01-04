@@ -15,7 +15,6 @@ _This project was pursued as a research project under Brown University's [Explor
   <br />
   <i>Some members of p-ASL hard at work</i>
 </p>
-<br />
 
 ## Data collection
 
@@ -55,7 +54,6 @@ Additionally, we trained an LSTM on the nine possible motions to ensure that the
 <p align="center">
   <img src="src/motion_robust.png" width="500px"/>
 </p>
-<br />
 
 ## Setup
 
